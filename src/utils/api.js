@@ -6,8 +6,19 @@ const itemNameMappings = {
   'Partition extra-blanche': 'Partition rectangulaire blanche'
 }
 
+function cleanItemName(name) {
+  return name
+    .replace(/\u00AD/g, '')
+    .replace(/\u200B/g, '')
+    .replace(/\u200C/g, '')
+    .replace(/\u200D/g, '')
+    .replace(/\uFEFF/g, '')
+    .trim()
+}
+
 async function searchItemByName(itemName) {
-  const mappedName = itemNameMappings[itemName] || itemName
+  const cleanedName = cleanItemName(itemName)
+  const mappedName = itemNameMappings[cleanedName] || cleanedName
   const cacheKey = mappedName
   if (itemNameCache.has(cacheKey)) {
     return itemNameCache.get(cacheKey)

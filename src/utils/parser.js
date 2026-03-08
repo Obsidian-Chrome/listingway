@@ -47,7 +47,7 @@ export function parseFurnitureList(text) {
     }
     
     if (currentSection && isItemLine) {
-      const match = line.match(/^(.+?):\s*(\d+)$/)
+      const match = line.match(/^(.*?):\s*(\d+)$/)
       if (match) {
         const [, name, quantity] = match
         console.log(`Item parsé [${currentSection}]:`, name, 'x', quantity)
