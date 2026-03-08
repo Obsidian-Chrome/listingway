@@ -1,3 +1,5 @@
+import hardcodedItemsData from '../data/hardcodedItems.json'
+
 const UNIVERSALIS_API = 'https://universalis.app/api/v2'
 
 const itemNameCache = new Map()
@@ -7,14 +9,15 @@ const itemNameMappings = {
   'Pilier usine désafectée': 'Pilier usine désaffectée'
 }
 
-const hardcodedItems = {
-  'projecteur de ciel magique bleu azur': { itemId: 40635, price: 10000, world: 'Boutique PNJ', source: 'shop' },
-  'projecteur de ciel magique crépuscule': { itemId: 41823, price: 10000, world: 'Boutique PNJ', source: 'shop' },
-  'projecteur de ciel magique étoilé': { itemId: 40636, price: 10000, world: 'Boutique PNJ', source: 'shop' },
-  'documents d\'investigation': { itemId: 44883, price: 900, world: 'Boutique PNJ', source: 'shop' },
-  'licence de recrutement réparateur 3': { itemId: 21201, price: 0, world: 'Boutique PNJ', source: 'shop' },
-  'pilier usine désaffectée': { itemId: 37365, price: 0, world: 'N/A', source: 'marketboard' }
-}
+const hardcodedItems = {}
+hardcodedItemsData.items.forEach(item => {
+  hardcodedItems[item.name] = {
+    itemId: item.itemId,
+    price: item.price,
+    world: item.world,
+    source: item.source
+  }
+})
 
 function cleanItemName(name) {
   return name
