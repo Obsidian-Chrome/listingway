@@ -9,25 +9,66 @@ async function searchItemByName(itemName) {
   }
 
   try {
-    const searchUrl = `https://cafemaker.wakingsands.com/search?string=${encodeURIComponent(itemName)}&indexes=Item&language=fr&limit=3`
+    const searchUrl = `https://www.garlandtools.org/api/search.php?text=${encodeURIComponent(itemName)}&lang=fr`
     const searchResponse = await fetch(searchUrl)
     
     if (!searchResponse.ok) {
-      console.warn(`XIVAPI error ${searchResponse.status} pour "${itemName}"`)
-      return { itemId: null, price: 0, avgPrice: 0, world: 'N/A' }
+      console.warn(`Garland Tools error ${searchResponse.status} pour "${itemName}"`)
+      return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'Erreur' }
     }
     
     const searchData = await searchResponse.json()
     
-    if (searchData.Results && searchData.Results.length > 0) {
-      const itemId = searchData.Results[0].ID
+    if (searchData && searchData.length > 0 && searchData[0].obj && searchData[0].obj.i) {
+      const itemId = searchData[0].obj.i
+      
+      const itemDataUrl = `https://www.garlandtools.org/db/doc/item/fr/3/${itemId}.json`
+      const itemDataResponse = await fetch(itemDataUrl)
+      
+      if (!itemDataResponse.ok) {
+        console.warn(`Garland Tools item data error ${itemDataResponse.status} pour item ${itemId}`)
+        return { itemId, price: 0, avgPrice: 0, world: 'N/A', source: 'Erreur' }
+      }
+      
+      const itemData = await itemDataResponse.json()
+      const item = itemData.item
+      
+      if (!item.tradeable || item.tradeable === 0) {
+        if (item.vendors && item.vendors.length > 0) {
+          const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop' }
+          itemNameCache.set(cacheKey, result)
+          return result
+        }
+        
+        if (item.craft && item.craft.length > 0) {
+          const result = { itemId, price: 0, avgPrice: 0, world: 'Craftable', source: 'craft' }
+          itemNameCache.set(cacheKey, result)
+          return result
+        }
+        
+        if (item.pvp) {
+          const result = { itemId, price: 0, avgPrice: 0, world: 'PVP', source: 'pvp' }
+          itemNameCache.set(cacheKey, result)
+          return result
+        }
+        
+        const result = { itemId, price: 0, avgPrice: 0, world: 'Non échangeable', source: 'untradeable' }
+        itemNameCache.set(cacheKey, result)
+        return result
+      }
+      
+      if (item.vendors && item.vendors.length > 0) {
+        const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop' }
+        itemNameCache.set(cacheKey, result)
+        return result
+      }
       
       const priceUrl = `${UNIVERSALIS_API}/Chaos/${itemId}`
       const priceResponse = await fetch(priceUrl)
       
       if (!priceResponse.ok) {
         console.warn(`Universalis error ${priceResponse.status} pour item ${itemId}`)
-        return { itemId, price: 0, avgPrice: 0, world: 'N/A' }
+        return { itemId, price: 0, avgPrice: 0, world: 'N/A', source: 'error' }
       }
       
       const priceData = await priceResponse.json()
@@ -52,7 +93,8 @@ async function searchItemByName(itemName) {
         itemId,
         price: cheapestPrice,
         avgPrice: priceData.currentAveragePrice || 0,
-        world: cheapestWorld
+        world: cheapestWorld,
+        source: 'marketboard'
       }
       
       itemNameCache.set(cacheKey, result)
@@ -62,7 +104,7 @@ async function searchItemByName(itemName) {
     console.error(`Erreur lors de la recherche de ${itemName}:`, error)
   }
   
-  return { itemId: null, price: 0, avgPrice: 0, world: 'N/A' }
+  return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'error' }
 }
 
 export async function fetchPrices(parsedData) {

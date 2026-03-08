@@ -3,6 +3,7 @@ import { Upload, FileText, Download, Loader2, Rabbit } from 'lucide-react'
 import FurnitureTable from './components/FurnitureTable'
 import { parseFurnitureList } from './utils/parser'
 import { fetchPrices } from './utils/api'
+import backgroundImage from '/background.webp'
 
 function App() {
   const [inputText, setInputText] = useState('')
@@ -79,7 +80,7 @@ function App() {
     <div className="min-h-screen relative">
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/background.webp)' }}
+        style={{ backgroundImage: `url(${backgroundImage})` }}
       />
       <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm" />
       
