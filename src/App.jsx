@@ -79,7 +79,7 @@ function App() {
     <div className="min-h-screen relative">
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/media/background.webp)' }}
+        style={{ backgroundImage: 'url(/background.webp)' }}
       />
       <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm" />
       
