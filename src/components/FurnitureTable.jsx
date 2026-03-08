@@ -1,0 +1,167 @@
+import { useState } from 'react'
+
+function FurnitureTable({ data }) {
+  const [editableData, setEditableData] = useState(data.items)
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+
+  const handleQuantityChange = (index, value) => {
+    const newData = [...editableData]
+    const numValue = parseInt(value, 10) || 0
+    newData[index].currentQuantity = numValue
+    
+    const price = newData[index].price || 0
+    const total = price * newData[index].quantity
+    const currentTotal = price * numValue
+    newData[index].remainingCost = Math.max(0, total - currentTotal)
+    
+    setEditableData(newData)
+  }
+
+  const handleSort = (key) => {
+    let direction = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortedData = () => {
+    if (!sortConfig.key) return editableData
+
+    const sorted = [...editableData].sort((a, b) => {
+      let aVal = a[sortConfig.key]
+      let bVal = b[sortConfig.key]
+
+      if (aVal === null || aVal === undefined) aVal = ''
+      if (bVal === null || bVal === undefined) bVal = ''
+
+      if (typeof aVal === 'string') {
+        return sortConfig.direction === 'asc'
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal)
+      }
+
+      return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal
+    })
+
+    return sorted
+  }
+
+  const formatGil = (amount) => {
+    return new Intl.NumberFormat('fr-FR').format(amount)
+  }
+
+  const totalCost = editableData.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+  const totalRemaining = editableData.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
+
+  return (
+    <div className="bg-slate-900/80 backdrop-blur-lg rounded-lg shadow-2xl overflow-hidden border border-blue-500/30">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-blue-900/60">
+            <tr>
+              <th 
+                onClick={() => handleSort('name')}
+                className="px-4 py-3 text-left text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Meuble
+              </th>
+              <th 
+                onClick={() => handleSort('dye')}
+                className="px-4 py-3 text-left text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Teinture
+              </th>
+              <th 
+                onClick={() => handleSort('quantity')}
+                className="px-4 py-3 text-center text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Quantité
+              </th>
+              <th className="px-4 py-3 text-center text-white font-semibold">
+                Quantité Actuelle
+              </th>
+              <th 
+                onClick={() => handleSort('world')}
+                className="px-4 py-3 text-center text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Serveur
+              </th>
+              <th 
+                onClick={() => handleSort('price')}
+                className="px-4 py-3 text-right text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Prix
+              </th>
+              <th 
+                onClick={() => handleSort('totalCost')}
+                className="px-4 py-3 text-right text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Coût Total
+              </th>
+              <th 
+                onClick={() => handleSort('remainingCost')}
+                className="px-4 py-3 text-right text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+              >
+                Coût Restant
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-blue-500/20">
+            {getSortedData().map((item, index) => (
+              <tr
+                key={index}
+                className="hover:bg-blue-900/20 transition-colors"
+              >
+                <td className="px-4 py-3 text-white">{item.name}</td>
+                <td className="px-4 py-3 text-blue-200">
+                  {item.dye || '-'}
+                </td>
+                <td className="px-4 py-3 text-center text-white">
+                  {item.quantity}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <input
+                    type="number"
+                    min="0"
+                    max={item.quantity}
+                    value={item.currentQuantity || 0}
+                    onChange={(e) => handleQuantityChange(index, e.target.value)}
+                    className="w-20 px-2 py-1 bg-slate-800/80 border border-blue-400/40 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </td>
+                <td className="px-4 py-3 text-center text-blue-200">
+                  {item.world || 'N/A'}
+                </td>
+                <td className="px-4 py-3 text-right text-white">
+                  {formatGil(item.price || 0)} gil
+                </td>
+                <td className="px-4 py-3 text-right text-white font-semibold">
+                  {formatGil(item.totalCost || 0)} gil
+                </td>
+                <td className="px-4 py-3 text-right text-yellow-300 font-semibold">
+                  {formatGil(item.remainingCost || 0)} gil
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot className="bg-blue-900/70">
+            <tr>
+              <td colSpan="6" className="px-4 py-3 text-right text-white font-bold">
+                TOTAL:
+              </td>
+              <td className="px-4 py-3 text-right text-white font-bold text-lg">
+                {formatGil(totalCost)} gil
+              </td>
+              <td className="px-4 py-3 text-right text-cyan-300 font-bold text-lg">
+                {formatGil(totalRemaining)} gil
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+export default FurnitureTable
