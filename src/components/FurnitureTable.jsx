@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Info } from 'lucide-react'
 
 function FurnitureTable({ data, showDyeColumn = true }) {
   const [editableData, setEditableData] = useState(data.items)
@@ -124,7 +125,18 @@ function FurnitureTable({ data, showDyeColumn = true }) {
                 Quantité
               </th>
               <th className="px-4 py-3 text-center text-white font-semibold">
-                Quantité Actuelle
+                <div className="flex items-center justify-center gap-2">
+                  <span>Quantité Actuelle</span>
+                  {!showDyeColumn && (
+                    <div className="relative group">
+                      <Info size={16} className="text-blue-300 cursor-help" />
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-blue-400/30">
+                        Non éditable quand "Afficher la colonne teintures" est décochée
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </th>
               <th 
                 onClick={() => handleSort('world')}
@@ -168,14 +180,18 @@ function FurnitureTable({ data, showDyeColumn = true }) {
                   {item.quantity}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <input
-                    type="number"
-                    min="0"
-                    max={item.quantity}
-                    value={item.currentQuantity || 0}
-                    onChange={(e) => handleQuantityChange(index, e.target.value)}
-                    className="w-20 px-2 py-1 bg-slate-800/80 border border-blue-400/40 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  {showDyeColumn ? (
+                    <input
+                      type="number"
+                      min="0"
+                      max={item.quantity}
+                      value={item.currentQuantity || 0}
+                      onChange={(e) => handleQuantityChange(index, e.target.value)}
+                      className="w-20 px-2 py-1 bg-slate-800/80 border border-blue-400/40 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <span className="text-white">{item.currentQuantity || 0}</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-center text-blue-200">
                   {item.world || 'N/A'}

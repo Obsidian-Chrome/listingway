@@ -10,7 +10,7 @@ function App() {
   const [inputText, setInputText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [showDyeColumn, setShowDyeColumn] = useState(true)
+  const [showDyeColumn, setShowDyeColumn] = useState(false)
   const [selectedDatacenters, setSelectedDatacenters] = useState({
     chaos: true,
     light: false,
