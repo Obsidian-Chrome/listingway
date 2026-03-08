@@ -9,6 +9,14 @@ function App() {
   const [inputText, setInputText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [selectedDatacenters, setSelectedDatacenters] = useState({
+    chaos: true,
+    light: false,
+    elemental: false,
+    gaia: false,
+    mana: false,
+    meteor: false
+  })
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0]
@@ -24,10 +32,19 @@ function App() {
   const handleParse = async () => {
     if (!inputText.trim()) return
     
+    const activeDatacenters = Object.entries(selectedDatacenters)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([dc]) => dc)
+    
+    if (activeDatacenters.length === 0) {
+      alert('Veuillez sélectionner au moins un datacenter')
+      return
+    }
+    
     setLoading(true)
     try {
       const parsed = parseFurnitureList(inputText)
-      const withPrices = await fetchPrices(parsed)
+      const withPrices = await fetchPrices(parsed, activeDatacenters)
       setParsedData(withPrices)
     } catch (error) {
       console.error('Erreur lors du parsing:', error)
@@ -46,10 +63,7 @@ function App() {
       'Quantité',
       'Quantité Actuelle',
       'Serveur',
-      'Prix Unitaire',
-      'Total',
-      'Coût Total',
-      'Coût Restant'
+      'Prix Unitaire'
     ]
 
     const rows = parsedData.items.map(item => [
@@ -58,21 +72,34 @@ function App() {
       item.quantity,
       item.currentQuantity || 0,
       item.world || 'N/A',
-      item.price || 0,
-      item.total || 0,
-      item.totalCost || 0,
-      item.remainingCost || 0
+      item.price || 0
     ])
+
+    const totalCost = parsedData.items.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+    const totalRemaining = parsedData.items.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
+
+    const summaryRows = [
+      [],
+      ['COÛT TOTAL', '', '', '', '', totalCost],
+      ['COÛT RESTANT', '', '', '', '', totalRemaining]
+    ]
 
     const csvContent = [
       headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+      ...summaryRows.map(row => row.map(cell => `"${cell}"`).join(','))
     ].join('\n')
+
+    const now = new Date()
+    const day = String(now.getDate()).padStart(2, '0')
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const year = now.getFullYear()
+    const filename = `listingway_${day}_${month}_${year}.csv`
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = `ffxiv_furniture_list_chaos_${new Date().toISOString().split('T')[0]}.csv`
+    link.download = filename
     link.click()
   }
 
@@ -126,6 +153,78 @@ function App() {
                 placeholder="Collez votre liste de meubles ici..."
                 className="w-full h-64 px-4 py-2 bg-slate-800/80 border border-blue-400/40 rounded-lg text-white placeholder-blue-300/60 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
               />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-white font-semibold mb-3">
+                Datacenters à comparer
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-blue-200 text-sm font-medium mb-2">Europe</div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDatacenters.chaos}
+                        onChange={(e) => setSelectedDatacenters({...selectedDatacenters, chaos: e.target.checked})}
+                        className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span>Chaos</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDatacenters.light}
+                        onChange={(e) => setSelectedDatacenters({...selectedDatacenters, light: e.target.checked})}
+                        className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span>Light</span>
+                    </label>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-blue-200 text-sm font-medium mb-2">Japon</div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDatacenters.elemental}
+                        onChange={(e) => setSelectedDatacenters({...selectedDatacenters, elemental: e.target.checked})}
+                        className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span>Elemental</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDatacenters.gaia}
+                        onChange={(e) => setSelectedDatacenters({...selectedDatacenters, gaia: e.target.checked})}
+                        className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span>Gaia</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDatacenters.mana}
+                        onChange={(e) => setSelectedDatacenters({...selectedDatacenters, mana: e.target.checked})}
+                        className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span>Mana</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedDatacenters.meteor}
+                        onChange={(e) => setSelectedDatacenters({...selectedDatacenters, meteor: e.target.checked})}
+                        className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span>Meteor</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-4">

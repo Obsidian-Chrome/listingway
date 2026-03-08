@@ -89,18 +89,28 @@ async function searchItemByName(itemName) {
         return result
       }
       
-      const priceUrl = `${UNIVERSALIS_API}/Chaos/${itemId}`
+      return { itemId, item, frenchName }
+    }
+  } catch (error) {
+    console.error(`Erreur lors de la recherche de ${mappedName}:`, error)
+  }
+  
+  return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'error', frenchName: mappedName }
+}
+
+async function fetchPricesFromDatacenters(itemId, datacenters) {
+  let cheapestWorld = 'N/A'
+  let cheapestPrice = Infinity
+  let avgPrice = 0
+  
+  for (const dc of datacenters) {
+    try {
+      const priceUrl = `${UNIVERSALIS_API}/${dc}/${itemId}`
       const priceResponse = await fetch(priceUrl)
       
-      if (!priceResponse.ok) {
-        console.warn(`Universalis error ${priceResponse.status} pour item ${itemId}`)
-        return { itemId, price: 0, avgPrice: 0, world: 'N/A', source: 'error', frenchName }
-      }
+      if (!priceResponse.ok) continue
       
       const priceData = await priceResponse.json()
-      
-      let cheapestWorld = 'N/A'
-      let cheapestPrice = Infinity
       
       if (priceData.listings && priceData.listings.length > 0) {
         priceData.listings.forEach(listing => {
@@ -111,30 +121,51 @@ async function searchItemByName(itemName) {
         })
       }
       
-      if (cheapestPrice === Infinity) {
-        cheapestPrice = priceData.minPrice || priceData.currentAveragePrice || 0
+      if (cheapestPrice === Infinity && priceData.minPrice && priceData.minPrice < cheapestPrice) {
+        cheapestPrice = priceData.minPrice
       }
       
-      const result = {
-        itemId,
-        price: cheapestPrice,
-        avgPrice: priceData.currentAveragePrice || 0,
-        world: cheapestWorld,
-        source: 'marketboard',
-        frenchName
+      if (priceData.currentAveragePrice && avgPrice === 0) {
+        avgPrice = priceData.currentAveragePrice
       }
-      
-      itemNameCache.set(cacheKey, result)
-      return result
+    } catch (error) {
+      console.warn(`Erreur Universalis pour ${dc}/${itemId}:`, error)
     }
-  } catch (error) {
-    console.error(`Erreur lors de la recherche de ${mappedName}:`, error)
   }
   
-  return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'error', frenchName: mappedName }
+  if (cheapestPrice === Infinity) {
+    cheapestPrice = 0
+  }
+  
+  return {
+    price: cheapestPrice,
+    avgPrice,
+    world: cheapestWorld
+  }
 }
 
-export async function fetchPrices(parsedData) {
+async function searchItemByNameWithDatacenters(itemName, datacenters) {
+  const itemInfo = await searchItemByName(itemName)
+  
+  if (!itemInfo.itemId || itemInfo.source === 'shop' || itemInfo.source === 'craft' || itemInfo.source === 'pvp' || itemInfo.source === 'untradeable' || itemInfo.source === 'error') {
+    return itemInfo
+  }
+  
+  const priceInfo = await fetchPricesFromDatacenters(itemInfo.itemId, datacenters)
+  
+  const result = {
+    itemId: itemInfo.itemId,
+    price: priceInfo.price,
+    avgPrice: priceInfo.avgPrice,
+    world: priceInfo.world,
+    source: 'marketboard',
+    frenchName: itemInfo.frenchName
+  }
+  
+  return result
+}
+
+export async function fetchPrices(parsedData, datacenters = ['chaos']) {
   const itemsWithPrices = []
   
   const batchSize = 5
@@ -142,7 +173,7 @@ export async function fetchPrices(parsedData) {
     const batch = parsedData.items.slice(i, i + batchSize)
     
     const batchPromises = batch.map(async (item) => {
-      const priceInfo = await searchItemByName(item.name)
+      const priceInfo = await searchItemByNameWithDatacenters(item.name, datacenters)
       
       const price = priceInfo.price
       const total = price * item.quantity
