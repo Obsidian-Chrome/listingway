@@ -55,7 +55,22 @@ function FurnitureTable({ data }) {
   const totalRemaining = editableData.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
 
   return (
-    <div className="bg-slate-900/80 backdrop-blur-lg rounded-lg shadow-2xl overflow-hidden border border-blue-500/30">
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-blue-900/90 to-cyan-900/90 backdrop-blur-lg rounded-lg shadow-2xl p-6 border-2 border-blue-400/50">
+        <div className="flex justify-around items-center">
+          <div className="text-center">
+            <div className="text-blue-200 text-sm font-medium mb-1">Coût Total</div>
+            <div className="text-white text-3xl font-bold whitespace-nowrap">{formatGil(totalCost)} <span className="text-cyan-300">gil</span></div>
+          </div>
+          <div className="h-12 w-px bg-blue-400/30" />
+          <div className="text-center">
+            <div className="text-blue-200 text-sm font-medium mb-1">Coût Restant</div>
+            <div className="text-yellow-300 text-3xl font-bold whitespace-nowrap">{formatGil(totalRemaining)} <span className="text-yellow-400">gil</span></div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-slate-900/80 backdrop-blur-lg rounded-lg shadow-2xl overflow-hidden border border-blue-500/30">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-blue-900/60">
@@ -133,13 +148,13 @@ function FurnitureTable({ data }) {
                 <td className="px-4 py-3 text-center text-blue-200">
                   {item.world || 'N/A'}
                 </td>
-                <td className="px-4 py-3 text-right text-white">
+                <td className="px-4 py-3 text-right text-white whitespace-nowrap">
                   {formatGil(item.price || 0)} gil
                 </td>
-                <td className="px-4 py-3 text-right text-white font-semibold">
+                <td className="px-4 py-3 text-right text-white font-semibold whitespace-nowrap">
                   {formatGil(item.totalCost || 0)} gil
                 </td>
-                <td className="px-4 py-3 text-right text-yellow-300 font-semibold">
+                <td className="px-4 py-3 text-right text-yellow-300 font-semibold whitespace-nowrap">
                   {formatGil(item.remainingCost || 0)} gil
                 </td>
               </tr>
@@ -150,16 +165,17 @@ function FurnitureTable({ data }) {
               <td colSpan="6" className="px-4 py-3 text-right text-white font-bold">
                 TOTAL:
               </td>
-              <td className="px-4 py-3 text-right text-white font-bold text-lg">
+              <td className="px-4 py-3 text-right text-white font-bold text-lg whitespace-nowrap">
                 {formatGil(totalCost)} gil
               </td>
-              <td className="px-4 py-3 text-right text-cyan-300 font-bold text-lg">
+              <td className="px-4 py-3 text-right text-cyan-300 font-bold text-lg whitespace-nowrap">
                 {formatGil(totalRemaining)} gil
               </td>
             </tr>
           </tfoot>
         </table>
       </div>
+    </div>
     </div>
   )
 }

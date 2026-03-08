@@ -2,25 +2,50 @@ const UNIVERSALIS_API = 'https://universalis.app/api/v2'
 
 const itemNameCache = new Map()
 
+const itemNameMappings = {
+  'Partition extra-blanche': 'Partition rectangulaire blanche'
+}
+
 async function searchItemByName(itemName) {
-  const cacheKey = itemName
+  const mappedName = itemNameMappings[itemName] || itemName
+  const cacheKey = mappedName
   if (itemNameCache.has(cacheKey)) {
     return itemNameCache.get(cacheKey)
   }
 
+  const isDye = mappedName.toLowerCase().includes('teinture') || mappedName.toLowerCase().includes('dye')
+
   try {
-    const searchUrl = `https://www.garlandtools.org/api/search.php?text=${encodeURIComponent(itemName)}&lang=fr`
-    const searchResponse = await fetch(searchUrl)
+    let itemId = null
+    let frenchName = mappedName
     
-    if (!searchResponse.ok) {
-      console.warn(`Garland Tools error ${searchResponse.status} pour "${itemName}"`)
-      return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'Erreur' }
+    const searchUrlFr = `https://www.garlandtools.org/api/search.php?text=${encodeURIComponent(mappedName)}&lang=fr`
+    const searchResponseFr = await fetch(searchUrlFr)
+    
+    if (searchResponseFr.ok) {
+      const searchDataFr = await searchResponseFr.json()
+      if (searchDataFr && searchDataFr.length > 0 && searchDataFr[0].obj && searchDataFr[0].obj.i) {
+        itemId = searchDataFr[0].obj.i
+      }
     }
     
-    const searchData = await searchResponse.json()
+    if (!itemId) {
+      console.log(`Pas de résultat en FR pour "${mappedName}", essai en EN...`)
+      const searchUrlEn = `https://www.garlandtools.org/api/search.php?text=${encodeURIComponent(mappedName)}&lang=en`
+      const searchResponseEn = await fetch(searchUrlEn)
+      
+      if (!searchResponseEn.ok) {
+        console.warn(`Garland Tools error ${searchResponseEn.status} pour "${mappedName}"`)
+        return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'Erreur', frenchName: mappedName }
+      }
+      
+      const searchDataEn = await searchResponseEn.json()
+      if (searchDataEn && searchDataEn.length > 0 && searchDataEn[0].obj && searchDataEn[0].obj.i) {
+        itemId = searchDataEn[0].obj.i
+      }
+    }
     
-    if (searchData && searchData.length > 0 && searchData[0].obj && searchData[0].obj.i) {
-      const itemId = searchData[0].obj.i
+    if (itemId) {
       
       const itemDataUrl = `https://www.garlandtools.org/db/doc/item/fr/3/${itemId}.json`
       const itemDataResponse = await fetch(itemDataUrl)
@@ -32,33 +57,34 @@ async function searchItemByName(itemName) {
       
       const itemData = await itemDataResponse.json()
       const item = itemData.item
+      frenchName = item.name || mappedName
       
       if (!item.tradeable || item.tradeable === 0) {
         if (item.vendors && item.vendors.length > 0) {
-          const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop' }
+          const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop', frenchName }
           itemNameCache.set(cacheKey, result)
           return result
         }
         
         if (item.craft && item.craft.length > 0) {
-          const result = { itemId, price: 0, avgPrice: 0, world: 'Craftable', source: 'craft' }
+          const result = { itemId, price: 0, avgPrice: 0, world: 'Craftable', source: 'craft', frenchName }
           itemNameCache.set(cacheKey, result)
           return result
         }
         
         if (item.pvp) {
-          const result = { itemId, price: 0, avgPrice: 0, world: 'PVP', source: 'pvp' }
+          const result = { itemId, price: 0, avgPrice: 0, world: 'PVP', source: 'pvp', frenchName }
           itemNameCache.set(cacheKey, result)
           return result
         }
         
-        const result = { itemId, price: 0, avgPrice: 0, world: 'Non échangeable', source: 'untradeable' }
+        const result = { itemId, price: 0, avgPrice: 0, world: 'Non échangeable', source: 'untradeable', frenchName }
         itemNameCache.set(cacheKey, result)
         return result
       }
       
-      if (item.vendors && item.vendors.length > 0) {
-        const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop' }
+      if (item.vendors && item.vendors.length > 0 && !isDye) {
+        const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop', frenchName }
         itemNameCache.set(cacheKey, result)
         return result
       }
@@ -68,7 +94,7 @@ async function searchItemByName(itemName) {
       
       if (!priceResponse.ok) {
         console.warn(`Universalis error ${priceResponse.status} pour item ${itemId}`)
-        return { itemId, price: 0, avgPrice: 0, world: 'N/A', source: 'error' }
+        return { itemId, price: 0, avgPrice: 0, world: 'N/A', source: 'error', frenchName }
       }
       
       const priceData = await priceResponse.json()
@@ -94,17 +120,18 @@ async function searchItemByName(itemName) {
         price: cheapestPrice,
         avgPrice: priceData.currentAveragePrice || 0,
         world: cheapestWorld,
-        source: 'marketboard'
+        source: 'marketboard',
+        frenchName
       }
       
       itemNameCache.set(cacheKey, result)
       return result
     }
   } catch (error) {
-    console.error(`Erreur lors de la recherche de ${itemName}:`, error)
+    console.error(`Erreur lors de la recherche de ${mappedName}:`, error)
   }
   
-  return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'error' }
+  return { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'error', frenchName: mappedName }
 }
 
 export async function fetchPrices(parsedData) {
@@ -124,6 +151,7 @@ export async function fetchPrices(parsedData) {
       
       return {
         ...item,
+        name: priceInfo.frenchName || item.name,
         price,
         avgPrice: priceInfo.avgPrice,
         world: priceInfo.world,
