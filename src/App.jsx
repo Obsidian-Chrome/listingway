@@ -10,6 +10,7 @@ function App() {
   const [inputText, setInputText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [showDyeColumn, setShowDyeColumn] = useState(true)
   const [selectedDatacenters, setSelectedDatacenters] = useState({
     chaos: true,
     light: false,
@@ -157,6 +158,18 @@ function App() {
             </div>
 
             <div className="mb-4">
+              <label className="flex items-center gap-2 text-white cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showDyeColumn}
+                  onChange={(e) => setShowDyeColumn(e.target.checked)}
+                  className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="font-semibold">Afficher la colonne teintures</span>
+              </label>
+            </div>
+
+            <div className="mb-4">
               <label className="block text-white font-semibold mb-3">
                 Datacenters à comparer
               </label>
@@ -260,7 +273,7 @@ function App() {
           </div>
 
           {parsedData && (
-            <FurnitureTable data={parsedData} />
+            <FurnitureTable data={parsedData} showDyeColumn={showDyeColumn} />
           )}
         </div>
       </div>

@@ -1,8 +1,34 @@
 import { useState } from 'react'
 
-function FurnitureTable({ data }) {
+function FurnitureTable({ data, showDyeColumn = true }) {
   const [editableData, setEditableData] = useState(data.items)
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
+
+  const getDisplayData = () => {
+    if (showDyeColumn) {
+      return editableData
+    }
+
+    const grouped = {}
+    editableData.forEach(item => {
+      if (!grouped[item.name]) {
+        grouped[item.name] = {
+          ...item,
+          dye: null,
+          quantity: 0,
+          currentQuantity: 0,
+          totalCost: 0,
+          remainingCost: 0
+        }
+      }
+      grouped[item.name].quantity += item.quantity
+      grouped[item.name].currentQuantity += item.currentQuantity || 0
+      grouped[item.name].totalCost += item.totalCost || 0
+      grouped[item.name].remainingCost += item.remainingCost || 0
+    })
+
+    return Object.values(grouped)
+  }
 
   const handleQuantityChange = (index, value) => {
     const newData = [...editableData]
@@ -26,9 +52,10 @@ function FurnitureTable({ data }) {
   }
 
   const getSortedData = () => {
-    if (!sortConfig.key) return editableData
+    const displayData = getDisplayData()
+    if (!sortConfig.key) return displayData
 
-    const sorted = [...editableData].sort((a, b) => {
+    const sorted = [...displayData].sort((a, b) => {
       let aVal = a[sortConfig.key]
       let bVal = b[sortConfig.key]
 
@@ -51,8 +78,9 @@ function FurnitureTable({ data }) {
     return new Intl.NumberFormat('fr-FR').format(amount)
   }
 
-  const totalCost = editableData.reduce((sum, item) => sum + (item.totalCost || 0), 0)
-  const totalRemaining = editableData.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
+  const displayData = getDisplayData()
+  const totalCost = displayData.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+  const totalRemaining = displayData.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
 
   return (
     <div className="space-y-6">
@@ -81,12 +109,14 @@ function FurnitureTable({ data }) {
               >
                 Meuble
               </th>
-              <th 
-                onClick={() => handleSort('dye')}
-                className="px-4 py-3 text-left text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
-              >
-                Teinture
-              </th>
+              {showDyeColumn && (
+                <th 
+                  onClick={() => handleSort('dye')}
+                  className="px-4 py-3 text-left text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
+                >
+                  Teinture
+                </th>
+              )}
               <th 
                 onClick={() => handleSort('quantity')}
                 className="px-4 py-3 text-center text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
@@ -129,9 +159,11 @@ function FurnitureTable({ data }) {
                 className="hover:bg-blue-900/20 transition-colors"
               >
                 <td className="px-4 py-3 text-white">{item.name}</td>
-                <td className="px-4 py-3 text-blue-200">
-                  {item.dye || '-'}
-                </td>
+                {showDyeColumn && (
+                  <td className="px-4 py-3 text-blue-200">
+                    {item.dye || '-'}
+                  </td>
+                )}
                 <td className="px-4 py-3 text-center text-white">
                   {item.quantity}
                 </td>
@@ -162,7 +194,7 @@ function FurnitureTable({ data }) {
           </tbody>
           <tfoot className="bg-blue-900/70">
             <tr>
-              <td colSpan="6" className="px-4 py-3 text-right text-white font-bold">
+              <td colSpan={showDyeColumn ? "6" : "5"} className="px-4 py-3 text-right text-white font-bold">
                 TOTAL:
               </td>
               <td className="px-4 py-3 text-right text-white font-bold text-lg whitespace-nowrap">

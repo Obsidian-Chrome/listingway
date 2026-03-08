@@ -3,7 +3,16 @@ const UNIVERSALIS_API = 'https://universalis.app/api/v2'
 const itemNameCache = new Map()
 
 const itemNameMappings = {
-  'Partition extra-blanche': 'Partition rectangulaire blanche'
+  'Partition extra-blanche': 'Partition rectangulaire blanche',
+  'Pilier usine désafectée': 'Pilier usine désaffectée'
+}
+
+const hardcodedItems = {
+  'Projecteur de ciel magique: bleu azur': { itemId: 40635, price: 10000, world: 'Boutique PNJ', source: 'shop' },
+  'Projecteur de ciel magique: crépuscule': { itemId: 41823, price: 10000, world: 'Boutique PNJ', source: 'shop' },
+  'Projecteur de ciel magique: étoilé': { itemId: 40636, price: 10000, world: 'Boutique PNJ', source: 'shop' },
+  'Documents d\'investigation': { itemId: 44883, price: 900, world: 'Boutique PNJ', source: 'shop' },
+  'Pilier usine désaffectée': { itemId: 37365, price: 0, world: 'N/A', source: 'marketboard' }
 }
 
 function cleanItemName(name) {
@@ -22,6 +31,13 @@ async function searchItemByName(itemName) {
   const cacheKey = mappedName
   if (itemNameCache.has(cacheKey)) {
     return itemNameCache.get(cacheKey)
+  }
+
+  if (hardcodedItems[mappedName]) {
+    const hardcoded = hardcodedItems[mappedName]
+    const result = { ...hardcoded, frenchName: mappedName }
+    itemNameCache.set(cacheKey, result)
+    return result
   }
 
   const isDye = mappedName.toLowerCase().includes('teinture') || mappedName.toLowerCase().includes('dye')
