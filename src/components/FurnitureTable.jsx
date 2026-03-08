@@ -86,16 +86,19 @@ function FurnitureTable({ data, showDyeColumn = true }) {
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-blue-900/90 to-cyan-900/90 backdrop-blur-lg rounded-lg shadow-2xl p-6 border-2 border-blue-400/50">
-        <div className="flex justify-around items-center">
+        <div className="flex justify-around items-center mb-4">
           <div className="text-center">
             <div className="text-blue-200 text-sm font-medium mb-1">Coût Total</div>
             <div className="text-white text-3xl font-bold whitespace-nowrap">{formatGil(totalCost)} <span className="text-cyan-300">gil</span></div>
           </div>
           <div className="h-12 w-px bg-blue-400/30" />
           <div className="text-center">
-            <div className="text-blue-200 text-sm font-medium mb-1">Coût Restant</div>
-            <div className="text-yellow-300 text-3xl font-bold whitespace-nowrap">{formatGil(totalRemaining)} <span className="text-yellow-400">gil</span></div>
+            <div className="text-blue-200 text-sm font-medium mb-1">Reste à payer</div>
+            <div className="text-cyan-300 text-3xl font-bold whitespace-nowrap">{formatGil(totalRemaining)} <span className="text-yellow-200">gil</span></div>
           </div>
+        </div>
+        <div className="text-center text-blue-200 text-sm italic border-t border-blue-400/30 pt-3">
+          Le résultat est une estimation basée sur le prix le plus bas de chaque item, prévoyez un peu plus large.
         </div>
       </div>
       
