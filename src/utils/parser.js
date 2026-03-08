@@ -1,5 +1,15 @@
+function cleanText(text) {
+  return text
+    .replace(/\u00AD/g, '')
+    .replace(/\u200B/g, '')
+    .replace(/\u200C/g, '')
+    .replace(/\u200D/g, '')
+    .replace(/\uFEFF/g, '')
+}
+
 export function parseFurnitureList(text) {
-  const lines = text.split('\n').map(line => line.trim()).filter(line => line)
+  const cleanedText = cleanText(text)
+  const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line)
   
   console.log('Total lines:', lines.length)
   
