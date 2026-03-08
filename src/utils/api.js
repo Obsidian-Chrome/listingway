@@ -8,11 +8,12 @@ const itemNameMappings = {
 }
 
 const hardcodedItems = {
-  'Projecteur de ciel magique: bleu azur': { itemId: 40635, price: 10000, world: 'Boutique PNJ', source: 'shop' },
-  'Projecteur de ciel magique: crépuscule': { itemId: 41823, price: 10000, world: 'Boutique PNJ', source: 'shop' },
-  'Projecteur de ciel magique: étoilé': { itemId: 40636, price: 10000, world: 'Boutique PNJ', source: 'shop' },
-  'Documents d\'investigation': { itemId: 44883, price: 900, world: 'Boutique PNJ', source: 'shop' },
-  'Pilier usine désaffectée': { itemId: 37365, price: 0, world: 'N/A', source: 'marketboard' }
+  'projecteur de ciel magique bleu azur': { itemId: 40635, price: 10000, world: 'Boutique PNJ', source: 'shop' },
+  'projecteur de ciel magique crépuscule': { itemId: 41823, price: 10000, world: 'Boutique PNJ', source: 'shop' },
+  'projecteur de ciel magique étoilé': { itemId: 40636, price: 10000, world: 'Boutique PNJ', source: 'shop' },
+  'documents d\'investigation': { itemId: 44883, price: 900, world: 'Boutique PNJ', source: 'shop' },
+  'licence de recrutement réparateur 3': { itemId: 21201, price: 0, world: 'Boutique PNJ', source: 'shop' },
+  'pilier usine désaffectée': { itemId: 37365, price: 0, world: 'N/A', source: 'marketboard' }
 }
 
 function cleanItemName(name) {
@@ -22,19 +23,22 @@ function cleanItemName(name) {
     .replace(/\u200C/g, '')
     .replace(/\u200D/g, '')
     .replace(/\uFEFF/g, '')
+    .replace(/\s*:\s*/g, ' ')
+    .toLowerCase()
     .trim()
 }
 
 async function searchItemByName(itemName) {
-  const cleanedName = cleanItemName(itemName)
-  const mappedName = itemNameMappings[cleanedName] || cleanedName
+  const originalName = itemName.trim()
+  const normalizedName = cleanItemName(itemName)
+  const mappedName = itemNameMappings[originalName] || originalName
   const cacheKey = mappedName
   if (itemNameCache.has(cacheKey)) {
     return itemNameCache.get(cacheKey)
   }
 
-  if (hardcodedItems[mappedName]) {
-    const hardcoded = hardcodedItems[mappedName]
+  if (hardcodedItems[normalizedName]) {
+    const hardcoded = hardcodedItems[normalizedName]
     const result = { ...hardcoded, frenchName: mappedName }
     itemNameCache.set(cacheKey, result)
     return result
