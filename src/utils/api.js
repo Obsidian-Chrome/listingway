@@ -9,7 +9,7 @@ async function searchItemByName(itemName) {
   }
 
   try {
-    const searchUrl = `https://xivapi.com/search?string=${encodeURIComponent(itemName)}&indexes=Item&limit=3`
+    const searchUrl = `https://cafemaker.wakingsands.com/search?string=${encodeURIComponent(itemName)}&indexes=Item&language=fr&limit=3`
     const searchResponse = await fetch(searchUrl)
     
     if (!searchResponse.ok) {
