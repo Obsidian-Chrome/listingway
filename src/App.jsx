@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Upload, FileText, Download, Loader2, Rabbit } from 'lucide-react'
+import { Upload, FileText, Download, Loader2 } from 'lucide-react'
 import FurnitureTable from './components/FurnitureTable'
 import { parseFurnitureList } from './utils/parser'
 import { fetchPrices } from './utils/api'
 import backgroundImage from '/background.webp'
+import logo from '/media/logo.png'
 
 function App() {
   const [inputText, setInputText] = useState('')
@@ -114,8 +115,8 @@ function App() {
       <div className="relative z-10 container mx-auto px-4 py-8">
         <header className="text-center mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-blue-600/80 backdrop-blur-sm rounded-lg flex items-center justify-center border-2 border-blue-400/50 shadow-lg">
-              <Rabbit size={40} className="text-white" />
+            <div className="w-16 h-16 bg-blue-600/80 backdrop-blur-sm rounded-lg flex items-center justify-center border-2 border-blue-400/50 shadow-lg overflow-hidden">
+              <img src={logo} alt="Listingway Logo" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-5xl font-bold text-white drop-shadow-lg">
               Listingway
@@ -127,7 +128,7 @@ function App() {
           <div className="bg-slate-900/80 backdrop-blur-lg rounded-lg shadow-2xl p-6 mb-6 border border-blue-500/30">
             <div className="mb-4">
               <label className="block text-white font-semibold mb-2">
-                Importer un fichier .txt
+                Importer le fichier .txt Remakeplace
               </label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer transition-colors shadow-lg">
@@ -145,12 +146,12 @@ function App() {
 
             <div className="mb-4">
               <label className="block text-white font-semibold mb-2">
-                Ou coller le texte directement
+                Ou coller le contenu du fichier Remakeplace
               </label>
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Collez votre liste de meubles ici..."
+                placeholder="Collez le contenu de votre fichier Remakeplace (.txt) ici..."
                 className="w-full h-64 px-4 py-2 bg-slate-800/80 border border-blue-400/40 rounded-lg text-white placeholder-blue-300/60 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
               />
             </div>
