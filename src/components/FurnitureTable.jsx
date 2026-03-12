@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Info } from 'lucide-react'
 
 function FurnitureTable({ data, showDyeColumn = true }) {
-  const [editableData, setEditableData] = useState(data.items)
+  const [editableData, setEditableData] = useState(() => 
+    data.items.map((item, idx) => ({ ...item, _id: idx }))
+  )
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
   const getDisplayData = () => {
@@ -31,15 +33,21 @@ function FurnitureTable({ data, showDyeColumn = true }) {
     return Object.values(grouped)
   }
 
-  const handleQuantityChange = (index, value) => {
-    const newData = [...editableData]
-    const numValue = parseInt(value, 10) || 0
-    newData[index].currentQuantity = numValue
-    
-    const price = newData[index].price || 0
-    const total = price * newData[index].quantity
-    const currentTotal = price * numValue
-    newData[index].remainingCost = Math.max(0, total - currentTotal)
+  const handleQuantityChange = (itemId, value) => {
+    const newData = editableData.map(item => {
+      if (item._id === itemId) {
+        const numValue = parseInt(value, 10) || 0
+        const price = item.price || 0
+        const total = price * item.quantity
+        const currentTotal = price * numValue
+        return {
+          ...item,
+          currentQuantity: numValue,
+          remainingCost: Math.max(0, total - currentTotal)
+        }
+      }
+      return item
+    })
     
     setEditableData(newData)
   }
@@ -168,9 +176,9 @@ function FurnitureTable({ data, showDyeColumn = true }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-blue-500/20">
-            {getSortedData().map((item, index) => (
+            {getSortedData().map((item) => (
               <tr
-                key={index}
+                key={item._id}
                 className="hover:bg-blue-900/20 transition-colors"
               >
                 <td className="px-4 py-3 text-white">{item.name}</td>
@@ -189,7 +197,7 @@ function FurnitureTable({ data, showDyeColumn = true }) {
                       min="0"
                       max={item.quantity}
                       value={item.currentQuantity || 0}
-                      onChange={(e) => handleQuantityChange(index, e.target.value)}
+                      onChange={(e) => handleQuantityChange(item._id, e.target.value)}
                       className="w-20 px-2 py-1 bg-slate-800/80 border border-blue-400/40 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   ) : (
