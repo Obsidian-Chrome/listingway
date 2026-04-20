@@ -10,6 +10,7 @@ function App() {
   const [inputText, setInputText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [showDyeColumn, setShowDyeColumn] = useState(false)
   const [selectedDatacenters, setSelectedDatacenters] = useState({
     chaos: true,
@@ -44,15 +45,22 @@ function App() {
     }
     
     setLoading(true)
+    setProgress({ current: 0, total: 0 })
     try {
       const parsed = parseFurnitureList(inputText)
-      const withPrices = await fetchPrices(parsed, activeDatacenters)
+      setProgress({ current: 0, total: parsed.items.length })
+      
+      const withPrices = await fetchPrices(parsed, activeDatacenters, (current, total) => {
+        setProgress({ current, total })
+      })
+      
       setParsedData(withPrices)
     } catch (error) {
       console.error('Erreur lors du parsing:', error)
       alert('Erreur lors du traitement des données')
     } finally {
       setLoading(false)
+      setProgress({ current: 0, total: 0 })
     }
   }
 
@@ -242,23 +250,33 @@ function App() {
             </div>
 
             <div className="flex gap-4">
-              <button
-                onClick={handleParse}
-                disabled={loading || !inputText.trim()}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors shadow-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={20} className="animate-spin" />
-                    <span>Traitement...</span>
-                  </>
-                ) : (
-                  <>
-                    <FileText size={20} />
-                    <span>Analyser la liste</span>
-                  </>
+              <div className="flex-1 max-w-md">
+                <button
+                  onClick={handleParse}
+                  disabled={loading || !inputText.trim()}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors shadow-lg"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      <span>Traitement... {progress.current}/{progress.total}</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileText size={20} />
+                      <span>Analyser la liste</span>
+                    </>
+                  )}
+                </button>
+                {loading && progress.total > 0 && (
+                  <div className="mt-2 w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-blue-400/30">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 ease-out"
+                      style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
 
               {parsedData && (
                 <button

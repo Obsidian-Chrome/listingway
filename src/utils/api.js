@@ -211,8 +211,9 @@ async function searchItemByNameWithDatacenters(itemName, datacenters) {
   return result
 }
 
-export async function fetchPrices(parsedData, datacenters = ['chaos']) {
+export async function fetchPrices(parsedData, datacenters = ['chaos'], onProgress = null) {
   const itemsWithPrices = []
+  const totalItems = parsedData.items.length
   
   const batchSize = 5
   for (let i = 0; i < parsedData.items.length; i += batchSize) {
@@ -240,6 +241,10 @@ export async function fetchPrices(parsedData, datacenters = ['chaos']) {
     
     const batchResults = await Promise.all(batchPromises)
     itemsWithPrices.push(...batchResults)
+    
+    if (onProgress) {
+      onProgress(itemsWithPrices.length, totalItems)
+    }
     
     if (i + batchSize < parsedData.items.length) {
       await new Promise(resolve => setTimeout(resolve, 500))
