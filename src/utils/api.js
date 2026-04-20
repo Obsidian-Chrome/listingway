@@ -1,6 +1,7 @@
 import hardcodedItemsData from '../data/hardcodedItems.json'
 
 const UNIVERSALIS_API = 'https://universalis.app/api/v2'
+const CORS_PROXY = 'https://universalis-proxy.djagokhit-643.workers.dev/?url='
 
 const itemNameCache = new Map()
 
@@ -140,13 +141,12 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
   for (const dc of datacenters) {
     try {
       const priceUrl = `${UNIVERSALIS_API}/${dc}/${itemId}`
-      const proxiedUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(priceUrl)}`
+      const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(priceUrl)}`
       const priceResponse = await fetch(proxiedUrl)
       
       if (!priceResponse.ok) continue
       
-      const proxyData = await priceResponse.json()
-      const priceData = JSON.parse(proxyData.contents)
+      const priceData = await priceResponse.json()
       
       if (priceData.listings && priceData.listings.length > 0) {
         priceData.listings.forEach(listing => {
