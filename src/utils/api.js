@@ -137,6 +137,7 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
   let cheapestWorld = 'N/A'
   let cheapestPrice = Infinity
   let avgPrice = 0
+  let hasTimeout = false
   
   for (const dc of datacenters) {
     try {
@@ -144,7 +145,12 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
       const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(priceUrl)}`
       const priceResponse = await fetch(proxiedUrl)
       
-      if (!priceResponse.ok) continue
+      if (!priceResponse.ok) {
+        if (priceResponse.status === 504) {
+          hasTimeout = true
+        }
+        continue
+      }
       
       const priceData = await priceResponse.json()
       
@@ -166,11 +172,15 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
       }
     } catch (error) {
       console.warn(`Erreur Universalis pour ${dc}/${itemId}:`, error)
+      hasTimeout = true
     }
   }
   
   if (cheapestPrice === Infinity) {
     cheapestPrice = 0
+    if (hasTimeout && cheapestWorld === 'N/A') {
+      cheapestWorld = 'Timeout'
+    }
   }
   
   return {

@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cloudflare Worker (local only)
+cloudflare-worker-proxy.js
+CLOUDFLARE_WORKER_SETUP.md
