@@ -65,13 +65,12 @@ export function parseFurnitureList(jsonData) {
     
     if (!itemId) return
     
-    const key = colorId ? `${itemId}_${colorId}` : `${itemId}`
+    const key = `${itemId}`
     
     if (!itemCounts.has(key)) {
       itemCounts.set(key, {
         itemId,
         name: furniture.name || '',
-        colorId: colorId || null,
         quantity: 0
       })
     }
