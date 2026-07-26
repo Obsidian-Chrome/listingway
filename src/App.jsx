@@ -8,6 +8,7 @@ import logo from '/media/logo.png'
 
 function App() {
   const [parsedData, setParsedData] = useState(null)
+  const [editedData, setEditedData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
   const [compareMode, setCompareMode] = useState(false)
@@ -153,31 +154,38 @@ function App() {
 
 
   const handleExportCSV = () => {
-    if (!parsedData) return
+    const dataToExport = editedData || parsedData
+    if (!dataToExport) return
 
     const headers = [
+      'ID',
       'Meuble',
       'Quantité',
       'Quantité Actuelle',
       'Serveur',
-      'Prix Unitaire'
+      'Prix Unitaire',
+      'Coût Total',
+      'Coût Restant'
     ]
 
-    const rows = parsedData.items.map(item => [
+    const rows = dataToExport.map(item => [
+      item.itemId || '',
       item.name,
       item.quantity,
       item.currentQuantity || 0,
       item.world || 'N/A',
-      item.price || 0
+      item.price || 0,
+      item.totalCost || 0,
+      item.remainingCost || 0
     ])
 
-    const totalCost = parsedData.items.reduce((sum, item) => sum + (item.totalCost || 0), 0)
-    const totalRemaining = parsedData.items.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
+    const totalCost = dataToExport.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+    const totalRemaining = dataToExport.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
 
     const summaryRows = [
       [],
-      ['COÛT TOTAL', '', '', '', '', totalCost],
-      ['COÛT RESTANT', '', '', '', '', totalRemaining]
+      ['', 'COÛT TOTAL', '', '', '', '', totalCost, ''],
+      ['', 'COÛT RESTANT', '', '', '', '', '', totalRemaining]
     ]
 
     const csvContent = [
@@ -433,7 +441,7 @@ function App() {
           </div>
 
           {parsedData && (
-            <FurnitureTable data={parsedData} />
+            <FurnitureTable data={parsedData} onDataChange={setEditedData} />
           )}
         </div>
       </div>

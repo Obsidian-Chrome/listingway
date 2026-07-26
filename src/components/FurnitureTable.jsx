@@ -1,10 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-function FurnitureTable({ data }) {
+function FurnitureTable({ data, onDataChange }) {
   const [editableData, setEditableData] = useState(() => 
     data.items.map((item, idx) => ({ ...item, _id: idx }))
   )
   const [sortConfig, setSortConfig] = useState({ key: 'world', direction: 'asc' })
+
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange(editableData)
+    }
+  }, [editableData, onDataChange])
 
   const handleQuantityChange = (itemId, value) => {
     const newData = editableData.map(item => {
