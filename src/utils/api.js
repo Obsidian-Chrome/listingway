@@ -1,24 +1,13 @@
-import hardcodedItemsData from '../data/hardcodedItems.json'
-
 const UNIVERSALIS_API = 'https://universalis.app/api/v2'
 const CORS_PROXY = 'https://universalis-proxy.djagokhit-643.workers.dev/?url='
 
 const itemNameCache = new Map()
+const itemIdCache = new Map()
 
 const itemNameMappings = {
   'Partition extra-blanche': 'Partition rectangulaire blanche',
   'Pilier usine désafectée': 'Pilier usine désaffectée'
 }
-
-const hardcodedItems = {}
-hardcodedItemsData.items.forEach(item => {
-  hardcodedItems[item.name] = {
-    itemId: item.itemId,
-    price: item.price,
-    world: item.world,
-    source: item.source
-  }
-})
 
 function cleanItemName(name) {
   return name
@@ -32,6 +21,64 @@ function cleanItemName(name) {
     .trim()
 }
 
+async function fetchItemById(itemId) {
+  if (itemIdCache.has(itemId)) {
+    return itemIdCache.get(itemId)
+  }
+
+  const itemDataUrl = `https://www.garlandtools.org/db/doc/item/fr/3/${itemId}.json`
+
+  try {
+    const itemDataResponse = await fetch(itemDataUrl)
+
+    if (!itemDataResponse.ok) {
+      console.warn(`Garland Tools item data error ${itemDataResponse.status} pour item ${itemId}`)
+      const result = { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'Erreur', frenchName: null }
+      itemIdCache.set(itemId, result)
+      return result
+    }
+
+    const itemData = await itemDataResponse.json()
+    const item = itemData.item
+    const frenchName = item.name || null
+
+    if (!item.tradeable || item.tradeable === 0) {
+      if (item.vendors && item.vendors.length > 0) {
+        const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop', frenchName }
+        itemIdCache.set(itemId, result)
+        return result
+      }
+      if (item.craft && item.craft.length > 0) {
+        const result = { itemId, price: 0, avgPrice: 0, world: 'Craftable', source: 'craft', frenchName }
+        itemIdCache.set(itemId, result)
+        return result
+      }
+      if (item.pvp) {
+        const result = { itemId, price: 0, avgPrice: 0, world: 'PVP', source: 'pvp', frenchName }
+        itemIdCache.set(itemId, result)
+        return result
+      }
+      const result = { itemId, price: 0, avgPrice: 0, world: 'Non échangeable', source: 'untradeable', frenchName }
+      itemIdCache.set(itemId, result)
+      return result
+    }
+
+    const isDye = frenchName && /teinture|dye/i.test(frenchName.toLowerCase())
+    if (item.vendors && item.vendors.length > 0 && !isDye) {
+      const result = { itemId, price: item.price || 0, avgPrice: 0, world: 'Boutique PNJ', source: 'shop', frenchName }
+      itemIdCache.set(itemId, result)
+      return result
+    }
+
+    return { itemId, item, frenchName }
+  } catch (error) {
+    console.error(`Erreur lors de la récupération de l'item ${itemId}:`, error)
+    const result = { itemId: null, price: 0, avgPrice: 0, world: 'N/A', source: 'error', frenchName: null }
+    itemIdCache.set(itemId, result)
+    return result
+  }
+}
+
 async function searchItemByName(itemName) {
   const originalName = itemName.trim()
   const normalizedName = cleanItemName(itemName)
@@ -39,13 +86,6 @@ async function searchItemByName(itemName) {
   const cacheKey = mappedName
   if (itemNameCache.has(cacheKey)) {
     return itemNameCache.get(cacheKey)
-  }
-
-  if (hardcodedItems[normalizedName]) {
-    const hardcoded = hardcodedItems[normalizedName]
-    const result = { ...hardcoded, frenchName: mappedName }
-    itemNameCache.set(cacheKey, result)
-    return result
   }
 
   const isDye = mappedName.toLowerCase().includes('teinture') || mappedName.toLowerCase().includes('dye')
@@ -137,6 +177,7 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
   let cheapestWorld = 'N/A'
   let cheapestPrice = Infinity
   let avgPrice = 0
+  let lastUploadTime = null
   let hasTimeout = false
   
   for (const dc of datacenters) {
@@ -159,6 +200,7 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
           if (listing.pricePerUnit < cheapestPrice) {
             cheapestPrice = listing.pricePerUnit
             cheapestWorld = listing.worldName || 'Unknown'
+            lastUploadTime = listing.lastReviewTime || null
           }
         })
       }
@@ -186,12 +228,18 @@ async function fetchPricesFromDatacenters(itemId, datacenters) {
   return {
     price: cheapestPrice,
     avgPrice,
-    world: cheapestWorld
+    world: cheapestWorld,
+    lastUploadTime
   }
 }
 
-async function searchItemByNameWithDatacenters(itemName, datacenters) {
-  const itemInfo = await searchItemByName(itemName)
+async function resolveItemWithDatacenters(item, datacenters) {
+  let itemInfo
+  if (item.itemId) {
+    itemInfo = await fetchItemById(item.itemId)
+  } else {
+    itemInfo = await searchItemByName(item.name)
+  }
   
   if (!itemInfo.itemId || itemInfo.source === 'shop' || itemInfo.source === 'craft' || itemInfo.source === 'pvp' || itemInfo.source === 'untradeable' || itemInfo.source === 'error') {
     return itemInfo
@@ -204,6 +252,7 @@ async function searchItemByNameWithDatacenters(itemName, datacenters) {
     price: priceInfo.price,
     avgPrice: priceInfo.avgPrice,
     world: priceInfo.world,
+    lastUploadTime: priceInfo.lastUploadTime,
     source: 'marketboard',
     frenchName: itemInfo.frenchName
   }
@@ -220,7 +269,7 @@ export async function fetchPrices(parsedData, datacenters = ['chaos'], onProgres
     const batch = parsedData.items.slice(i, i + batchSize)
     
     const batchPromises = batch.map(async (item) => {
-      const priceInfo = await searchItemByNameWithDatacenters(item.name, datacenters)
+      const priceInfo = await resolveItemWithDatacenters(item, datacenters)
       
       const price = priceInfo.price
       const total = price * item.quantity
@@ -229,10 +278,11 @@ export async function fetchPrices(parsedData, datacenters = ['chaos'], onProgres
       
       return {
         ...item,
-        name: priceInfo.frenchName || item.name,
+        name: priceInfo.frenchName || item.name || (item.itemId ? `Item #${item.itemId}` : 'Inconnu'),
         price,
         avgPrice: priceInfo.avgPrice,
         world: priceInfo.world,
+        lastUploadTime: priceInfo.lastUploadTime,
         total,
         totalCost: total,
         remainingCost: Math.max(0, remainingCost)

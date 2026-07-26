@@ -7,11 +7,12 @@ import backgroundImage from '/background.webp'
 import logo from '/media/logo.png'
 
 function App() {
-  const [inputText, setInputText] = useState('')
   const [parsedData, setParsedData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
-  const [showDyeColumn, setShowDyeColumn] = useState(false)
+  const [compareMode, setCompareMode] = useState(false)
+  const [currentHouseData, setCurrentHouseData] = useState(null)
+  const [futureHouseData, setFutureHouseData] = useState(null)
   const [selectedDatacenters, setSelectedDatacenters] = useState({
     chaos: true,
     light: false,
@@ -21,20 +22,81 @@ function App() {
     meteor: false
   })
 
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event, isCurrentHouse = true) => {
     const file = event.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setInputText(e.target.result)
+    if (!file) return
+    
+    if (compareMode) {
+      try {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          try {
+            const jsonData = JSON.parse(e.target.result)
+            if (isCurrentHouse) {
+              setCurrentHouseData(jsonData)
+            } else {
+              setFutureHouseData(jsonData)
+            }
+          } catch (error) {
+            console.error('Erreur lors du parsing:', error)
+            alert('Erreur: Le fichier doit être un JSON valide')
+          }
+        }
+        reader.readAsText(file)
+      } catch (error) {
+        console.error('Erreur lors de la lecture du fichier:', error)
+        alert('Erreur lors de la lecture du fichier')
       }
-      reader.readAsText(file)
+    } else {
+      const activeDatacenters = Object.entries(selectedDatacenters)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([dc]) => dc)
+      
+      if (activeDatacenters.length === 0) {
+        alert('Veuillez sélectionner au moins un datacenter')
+        return
+      }
+      
+      setLoading(true)
+      setProgress({ current: 0, total: 0 })
+      
+      try {
+        const reader = new FileReader()
+        reader.onload = async (e) => {
+          try {
+            const jsonData = JSON.parse(e.target.result)
+            const parsed = parseFurnitureList(jsonData)
+            setProgress({ current: 0, total: parsed.items.length })
+            
+            const withPrices = await fetchPrices(parsed, activeDatacenters, (current, total) => {
+              setProgress({ current, total })
+            })
+            
+            setParsedData(withPrices)
+          } catch (error) {
+            console.error('Erreur lors du parsing:', error)
+            alert('Erreur: Le fichier doit être un JSON valide')
+          } finally {
+            setLoading(false)
+            setProgress({ current: 0, total: 0 })
+          }
+        }
+        reader.readAsText(file)
+      } catch (error) {
+        console.error('Erreur lors de la lecture du fichier:', error)
+        alert('Erreur lors de la lecture du fichier')
+        setLoading(false)
+        setProgress({ current: 0, total: 0 })
+      }
     }
   }
 
-  const handleParse = async () => {
-    if (!inputText.trim()) return
-    
+  const handleCompare = async () => {
+    if (!currentHouseData || !futureHouseData) {
+      alert('Veuillez charger les deux fichiers JSON')
+      return
+    }
+
     const activeDatacenters = Object.entries(selectedDatacenters)
       .filter(([_, isSelected]) => isSelected)
       .map(([dc]) => dc)
@@ -43,33 +105,58 @@ function App() {
       alert('Veuillez sélectionner au moins un datacenter')
       return
     }
-    
+
     setLoading(true)
     setProgress({ current: 0, total: 0 })
+
     try {
-      const parsed = parseFurnitureList(inputText)
-      setProgress({ current: 0, total: parsed.items.length })
-      
-      const withPrices = await fetchPrices(parsed, activeDatacenters, (current, total) => {
+      const currentParsed = parseFurnitureList(currentHouseData)
+      const futureParsed = parseFurnitureList(futureHouseData)
+
+      const currentItems = new Map()
+      currentParsed.items.forEach(item => {
+        const key = `${item.itemId}`
+        currentItems.set(key, item.quantity)
+      })
+
+      const missingItems = []
+      futureParsed.items.forEach(item => {
+        const key = `${item.itemId}`
+        const currentQty = currentItems.get(key) || 0
+        const neededQty = item.quantity - currentQty
+
+        if (neededQty > 0) {
+          missingItems.push({
+            ...item,
+            quantity: neededQty,
+            currentQuantity: 0
+          })
+        }
+      })
+
+      const missingParsed = { items: missingItems, summary: { totalFurniture: missingItems.length, totalDyes: 0 } }
+      setProgress({ current: 0, total: missingItems.length })
+
+      const withPrices = await fetchPrices(missingParsed, activeDatacenters, (current, total) => {
         setProgress({ current, total })
       })
-      
+
       setParsedData(withPrices)
     } catch (error) {
-      console.error('Erreur lors du parsing:', error)
-      alert('Erreur lors du traitement des données')
+      console.error('Erreur lors de la comparaison:', error)
+      alert('Erreur lors de la comparaison')
     } finally {
       setLoading(false)
       setProgress({ current: 0, total: 0 })
     }
   }
 
+
   const handleExportCSV = () => {
     if (!parsedData) return
 
     const headers = [
       'Meuble',
-      'Teinture',
       'Quantité',
       'Quantité Actuelle',
       'Serveur',
@@ -78,7 +165,6 @@ function App() {
 
     const rows = parsedData.items.map(item => [
       item.name,
-      item.dye || '',
       item.quantity,
       item.currentQuantity || 0,
       item.world || 'N/A',
@@ -136,46 +222,130 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-slate-900/80 backdrop-blur-lg rounded-lg shadow-2xl p-6 mb-6 border border-blue-500/30">
             <div className="mb-4">
-              <label className="block text-white font-semibold mb-2">
-                Importer le fichier .txt Remakeplace
-              </label>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer transition-colors shadow-lg">
-                  <Upload size={20} />
-                  <span>Choisir un fichier</span>
-                  <input
-                    type="file"
-                    accept=".txt"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-white font-semibold mb-2">
-                Ou coller le contenu du fichier Remakeplace
-              </label>
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Collez le contenu de votre fichier Remakeplace (.txt) ici..."
-                className="w-full h-64 px-4 py-2 bg-slate-800/80 border border-blue-400/40 rounded-lg text-white placeholder-blue-300/60 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="flex items-center gap-2 text-white cursor-pointer">
+              <label className="flex items-center gap-2 text-white cursor-pointer mb-4">
                 <input
                   type="checkbox"
-                  checked={showDyeColumn}
-                  onChange={(e) => setShowDyeColumn(e.target.checked)}
+                  checked={compareMode}
+                  onChange={(e) => {
+                    setCompareMode(e.target.checked)
+                    setParsedData(null)
+                    setCurrentHouseData(null)
+                    setFutureHouseData(null)
+                  }}
                   className="w-4 h-4 rounded border-blue-400/40 bg-slate-800/80 text-blue-600 focus:ring-2 focus:ring-blue-500"
                 />
-                <span className="font-semibold">Afficher la colonne teintures</span>
+                <span className="font-semibold">Mode comparaison</span>
               </label>
             </div>
+
+            {!compareMode ? (
+              <div className="mb-4">
+                <label className="block text-white font-semibold mb-2">
+                  Importer le fichier .json Remakeplace
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg cursor-pointer transition-colors shadow-lg">
+                    <Upload size={20} />
+                    <span>Choisir un fichier</span>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleFileUpload}
+                      disabled={loading}
+                      className="hidden"
+                    />
+                  </label>
+                  {loading && (
+                    <div className="flex items-center gap-2 text-white">
+                      <Loader2 size={20} className="animate-spin" />
+                      <span>Traitement... {progress.current}/{progress.total}</span>
+                    </div>
+                  )}
+                </div>
+                {loading && progress.total > 0 && (
+                  <div className="mt-4 w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-blue-400/30">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 ease-out"
+                      style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4 mb-4">
+                <div>
+                  <label className="block text-white font-semibold mb-2">
+                    Remakeplace actuel
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer transition-colors shadow-lg">
+                      <Upload size={20} />
+                      <span>Choisir un fichier</span>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={(e) => handleFileUpload(e, true)}
+                        disabled={loading}
+                        className="hidden"
+                      />
+                    </label>
+                    {currentHouseData && (
+                      <span className="text-green-400">✓ Fichier chargé</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-white font-semibold mb-2">
+                    Remakeplace futur
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg cursor-pointer transition-colors shadow-lg">
+                      <Upload size={20} />
+                      <span>Choisir un fichier</span>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={(e) => handleFileUpload(e, false)}
+                        disabled={loading}
+                        className="hidden"
+                      />
+                    </label>
+                    {futureHouseData && (
+                      <span className="text-green-400">✓ Fichier chargé</span>
+                    )}
+                  </div>
+                </div>
+                {currentHouseData && futureHouseData && (
+                  <div>
+                    <button
+                      onClick={handleCompare}
+                      disabled={loading}
+                      className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors shadow-lg"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 size={20} className="animate-spin" />
+                          <span>Traitement... {progress.current}/{progress.total}</span>
+                        </>
+                      ) : (
+                        <>
+                          <FileText size={20} />
+                          <span>Comparer et calculer les items manquants</span>
+                        </>
+                      )}
+                    </button>
+                    {loading && progress.total > 0 && (
+                      <div className="mt-4 w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-blue-400/30">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-300 ease-out"
+                          style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mb-4">
               <label className="block text-white font-semibold mb-3">
@@ -249,36 +419,8 @@ function App() {
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-1 max-w-md">
-                <button
-                  onClick={handleParse}
-                  disabled={loading || !inputText.trim()}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors shadow-lg"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 size={20} className="animate-spin" />
-                      <span>Traitement... {progress.current}/{progress.total}</span>
-                    </>
-                  ) : (
-                    <>
-                      <FileText size={20} />
-                      <span>Analyser la liste</span>
-                    </>
-                  )}
-                </button>
-                {loading && progress.total > 0 && (
-                  <div className="mt-2 w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-blue-400/30">
-                    <div 
-                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300 ease-out"
-                      style={{ width: `${(progress.current / progress.total) * 100}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {parsedData && (
+            {parsedData && (
+              <div className="flex justify-end">
                 <button
                   onClick={handleExportCSV}
                   className="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
@@ -286,12 +428,12 @@ function App() {
                   <Download size={20} />
                   <span>Télécharger CSV</span>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {parsedData && (
-            <FurnitureTable data={parsedData} showDyeColumn={showDyeColumn} />
+            <FurnitureTable data={parsedData} />
           )}
         </div>
       </div>

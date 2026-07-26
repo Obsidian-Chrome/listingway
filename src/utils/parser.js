@@ -1,135 +1,130 @@
-function cleanText(text) {
-  return text
-    .replace(/\u00AD/g, '')
-    .replace(/\u200B/g, '')
-    .replace(/\u200C/g, '')
-    .replace(/\u200D/g, '')
-    .replace(/\uFEFF/g, '')
+import dyeMapping from '../data/dyeMapping.json'
+
+function isColorCode(value) {
+  return /^[0-9A-Fa-f]{6,8}$/i.test(value.trim())
 }
 
-export function parseFurnitureList(text) {
-  const cleanedText = cleanText(text)
-  const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line)
+function buildColorIdMap() {
+  const map = new Map()
+  Object.values(dyeMapping).forEach(category => {
+    category.forEach(dye => {
+      if (dye.colorId) {
+        map.set(dye.colorId.toUpperCase(), { 
+          name: dye.categoryName || dye.nom, 
+          itemId: dye.categoryId || dye.id 
+        })
+      }
+    })
+  })
+  return map
+}
+
+const colorIdMap = buildColorIdMap()
+
+function resolveDye(rawDye) {
+  const trimmed = rawDye.trim()
   
-  console.log('Total lines:', lines.length)
-  
-  const sections = {
-    furniture: [],
-    dyes: [],
-    furnitureWithDye: []
+  if (isColorCode(trimmed)) {
+    const upperCode = trimmed.toUpperCase()
+    const mapped = colorIdMap.get(upperCode)
+    if (mapped) {
+      return { name: mapped.name, itemId: mapped.itemId }
+    }
+    return { name: `Couleur ${trimmed}`, itemId: null }
   }
   
-  let currentSection = null
+  return { name: trimmed, itemId: null }
+}
+
+export function parseFurnitureList(jsonData) {
+  let data
   
-  for (const line of lines) {
-    const isItemLine = /^.+:\s*\d+$/.test(line)
+  if (typeof jsonData === 'string') {
+    try {
+      data = JSON.parse(jsonData)
+    } catch (error) {
+      console.error('Erreur de parsing JSON:', error)
+      return { items: [], summary: { totalFurniture: 0, totalDyes: 0 } }
+    }
+  } else {
+    data = jsonData
+  }
+  
+  const interiorFurniture = data.interiorFurniture || []
+  const exteriorFurniture = data.exteriorFurniture || []
+  const allFurniture = [...interiorFurniture, ...exteriorFurniture]
+  
+  console.log('Total furniture items:', allFurniture.length)
+  
+  const itemCounts = new Map()
+  const dyeCounts = new Map()
+  
+  allFurniture.forEach(furniture => {
+    const itemId = furniture.itemId
+    const colorId = furniture.properties?.color
     
-    if (!isItemLine && (line.includes('Furniture (With Dye)') || line.includes('teints'))) {
-      console.log('Section détectée: furnitureWithDye, ligne:', line)
-      currentSection = 'furnitureWithDye'
-      continue
+    if (!itemId) return
+    
+    const key = colorId ? `${itemId}_${colorId}` : `${itemId}`
+    
+    if (!itemCounts.has(key)) {
+      itemCounts.set(key, {
+        itemId,
+        name: furniture.name || '',
+        colorId: colorId || null,
+        quantity: 0
+      })
     }
     
-    if (!isItemLine && (line.includes('Dyes') || line.includes('Teinture'))) {
-      console.log('Section détectée: dyes, ligne:', line)
-      currentSection = 'dyes'
-      continue
-    }
+    itemCounts.get(key).quantity += 1
     
-    if (!isItemLine && (line.includes('Meubles') || (line.includes('Furniture') && !line.includes('(With Dye)')))) {
-      console.log('Section détectée: furniture, ligne:', line)
-      currentSection = 'furniture'
-      continue
-    }
-    
-    if (line.startsWith('=')) {
-      continue
-    }
-    
-    if (currentSection && isItemLine) {
-      const match = line.match(/^(.*?):\s*(\d+)$/)
-      if (match) {
-        const [, name, quantity] = match
-        console.log(`Item parsé [${currentSection}]:`, name, 'x', quantity)
-        
-        if (currentSection === 'furniture') {
-          sections.furniture.push({
-            name: name.trim(),
-            quantity: parseInt(quantity, 10),
-            dye: null
+    if (colorId) {
+      const dyeInfo = resolveDye(colorId)
+      if (dyeInfo.itemId) {
+        const key = dyeInfo.itemId
+        if (!dyeCounts.has(key)) {
+          dyeCounts.set(key, {
+            name: dyeInfo.name,
+            itemId: dyeInfo.itemId,
+            quantity: 0
           })
-        } else if (currentSection === 'dyes') {
-          sections.dyes.push({
-            name: name.trim(),
-            quantity: parseInt(quantity, 10)
-          })
-        } else if (currentSection === 'furnitureWithDye') {
-          const dyeMatch = name.match(/^(.+?)\s*\((.+?)\)$/)
-          if (dyeMatch) {
-            sections.furnitureWithDye.push({
-              name: dyeMatch[1].trim(),
-              dye: dyeMatch[2].trim(),
-              quantity: parseInt(quantity, 10)
-            })
-          } else {
-            sections.furnitureWithDye.push({
-              name: name.trim(),
-              quantity: parseInt(quantity, 10),
-              dye: null
-            })
-          }
         }
+        dyeCounts.get(key).quantity += 1
       }
     }
-  }
-  
-  console.log('Sections parsées:')
-  console.log('- Furniture:', sections.furniture.length, 'items')
-  console.log('- Dyes:', sections.dyes.length, 'items')
-  console.log('- FurnitureWithDye:', sections.furnitureWithDye.length, 'items')
-  
-  const allItems = []
-  const dyeMap = new Map()
-  
-  sections.dyes.forEach(dye => {
-    dyeMap.set(dye.name, dye.quantity)
   })
   
-  sections.furnitureWithDye.forEach(item => {
+  const allItems = []
+  
+  itemCounts.forEach(item => {
     allItems.push({
       name: item.name,
-      dye: item.dye,
+      itemId: item.itemId,
       quantity: item.quantity,
       currentQuantity: 0,
       type: 'furniture'
     })
   })
   
-  const uniqueDyes = new Set()
-  sections.furnitureWithDye.forEach(item => {
-    if (item.dye) {
-      uniqueDyes.add(item.dye)
-    }
-  })
-  
-  uniqueDyes.forEach(dyeName => {
-    const totalNeeded = dyeMap.get(dyeName) || 0
+  dyeCounts.forEach(dye => {
     allItems.push({
-      name: dyeName,
-      dye: null,
-      quantity: totalNeeded,
+      name: dye.name,
+      itemId: dye.itemId,
+      quantity: dye.quantity,
       currentQuantity: 0,
       type: 'dye'
     })
   })
   
   console.log('Total items à retourner:', allItems.length)
+  console.log('- Furniture:', itemCounts.size, 'items')
+  console.log('- Dyes:', dyeCounts.size, 'items')
   
   return {
     items: allItems,
     summary: {
-      totalFurniture: sections.furnitureWithDye.length,
-      totalDyes: uniqueDyes.size
+      totalFurniture: itemCounts.size,
+      totalDyes: dyeCounts.size
     }
   }
 }

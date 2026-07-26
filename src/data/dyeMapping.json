@@ -1,0 +1,766 @@
+{
+  "teinture_standard": [
+    {
+      "id": 5729,
+      "nom": "Teinture blanc neige",
+      "colorId": "E4DFD0FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5730,
+      "nom": "Teinture gris cendre",
+      "colorId": "898784FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5731,
+      "nom": "Teinture gris goobbue",
+      "colorId": "656565FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5732,
+      "nom": "Teinture gris ardoise",
+      "colorId": "484742FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5733,
+      "nom": "Teinture gris charbon",
+      "colorId": "2B2923FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5734,
+      "nom": "Teinture noir suie",
+      "colorId": "E69F96FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5735,
+      "nom": "Teinture rose floral",
+      "colorId": "836969FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5736,
+      "nom": "Teinture lilas",
+      "colorId": "5B1729FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5737,
+      "nom": "Teinture rouge rolanbaie",
+      "colorId": "781A1AFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5738,
+      "nom": "Teinture rouge Dalamud",
+      "colorId": "622207FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5739,
+      "nom": "Teinture rouille",
+      "colorId": "451511FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5740,
+      "nom": "Teinture lie-de-vin",
+      "colorId": "CC6C5EFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5741,
+      "nom": "Teinture rose corail",
+      "colorId": "913B27FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5742,
+      "nom": "Teinture rouge sang",
+      "colorId": "E4AA8AFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5743,
+      "nom": "Teinture rose saumon",
+      "colorId": "B75C2DFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5744,
+      "nom": "Teinture orange couchant",
+      "colorId": "7D3906FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5745,
+      "nom": "Teinture vermillon terne",
+      "colorId": "6A4B37FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5746,
+      "nom": "Teinture marron écorce",
+      "colorId": "6E3D24FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5747,
+      "nom": "Teinture chocolat",
+      "colorId": "4F2D1FFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5748,
+      "nom": "Teinture brun fauve",
+      "colorId": "30211BFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5749,
+      "nom": "Teinture brun kobold",
+      "colorId": "C99156FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5750,
+      "nom": "Teinture brun liège",
+      "colorId": "996E3FFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5751,
+      "nom": "Teinture brun qiqirn",
+      "colorId": "7B5C2DFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5752,
+      "nom": "Teinture brun opo-opo",
+      "colorId": "A2875CFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5753,
+      "nom": "Teinture brun bouquetin",
+      "colorId": "C57424FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5754,
+      "nom": "Teinture orange citrouille",
+      "colorId": "8E581BFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5755,
+      "nom": "Teinture brun noisette",
+      "colorId": "644216FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5756,
+      "nom": "Teinture feuille-morte",
+      "colorId": "3D290DFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5757,
+      "nom": "Teinture brun châtaigne",
+      "colorId": "B9A489FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5758,
+      "nom": "Teinture brun gobelin",
+      "colorId": "92816CFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5759,
+      "nom": "Teinture brun schiste",
+      "colorId": "615245FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5760,
+      "nom": "Teinture brun taupe",
+      "colorId": "3F3329FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5761,
+      "nom": "Teinture brun argile",
+      "colorId": "EBD3A0FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5762,
+      "nom": "Teinture ivoire",
+      "colorId": "B7A370FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5763,
+      "nom": "Teinture ocre uldien",
+      "colorId": "FAC62BFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5765,
+      "nom": "Teinture jaune miel",
+      "colorId": "E49E34FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5766,
+      "nom": "Teinture jaune milli-maïs",
+      "colorId": "BC8804FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5767,
+      "nom": "Teinture jaune coeurl",
+      "colorId": "A58430FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5768,
+      "nom": "Teinture jaune crème",
+      "colorId": "403311FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5769,
+      "nom": "Teinture jaune Halatali",
+      "colorId": "585230FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5770,
+      "nom": "Teinture raisin sec",
+      "colorId": "BBBB8AFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5771,
+      "nom": "Teinture kaki",
+      "colorId": "ABB054FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5772,
+      "nom": "Teinture vert sylphe",
+      "colorId": "707326FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5773,
+      "nom": "Teinture vert citron",
+      "colorId": "8B9C63FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5774,
+      "nom": "Teinture vert mousse",
+      "colorId": "4B5232FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5775,
+      "nom": "Teinture vert prairie",
+      "colorId": "323621FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5776,
+      "nom": "Teinture vert olive",
+      "colorId": "9BB363FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5777,
+      "nom": "Teinture vert viridien",
+      "colorId": "658241FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5778,
+      "nom": "Teinture vert pomme",
+      "colorId": "284B2CFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5779,
+      "nom": "Teinture vert cactuar",
+      "colorId": "406339FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5780,
+      "nom": "Teinture vert chasseur",
+      "colorId": "5F7558FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5781,
+      "nom": "Teinture vert otyugh",
+      "colorId": "3B4D3CFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5782,
+      "nom": "Teinture vert adamankhélone",
+      "colorId": "1E2A21FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5783,
+      "nom": "Teinture vert Nophica",
+      "colorId": "96BDB9FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5784,
+      "nom": "Teinture vert sapin",
+      "colorId": "437272FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5785,
+      "nom": "Teinture vert céleste",
+      "colorId": "1F4646FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5786,
+      "nom": "Teinture turquoise",
+      "colorId": "B2C4CEFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5787,
+      "nom": "Teinture vert morbol",
+      "colorId": "83B0D2FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5788,
+      "nom": "Teinture bleu glace",
+      "colorId": "6481A0FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5789,
+      "nom": "Teinture bleu ciel",
+      "colorId": "3B6886FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5790,
+      "nom": "Teinture bleu horizon",
+      "colorId": "1C3D54FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5791,
+      "nom": "Teinture bleu paon",
+      "colorId": "8E9BACFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5792,
+      "nom": "Teinture bleu de Rhotano",
+      "colorId": "4F5766FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5793,
+      "nom": "Teinture bleu charron",
+      "colorId": "2F3851FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5794,
+      "nom": "Teinture bleu céruleum",
+      "colorId": "1A1F27FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5795,
+      "nom": "Teinture bleu guède",
+      "colorId": "5B7FC0FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5796,
+      "nom": "Teinture bleu encre",
+      "colorId": "2F5889FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5797,
+      "nom": "Teinture bleu raptor",
+      "colorId": "234172FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5798,
+      "nom": "Teinture bleu d'Othard",
+      "colorId": "112944FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5799,
+      "nom": "Teinture bleu tempête",
+      "colorId": "273067FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5800,
+      "nom": "Teinture bleu du néant",
+      "colorId": "181937FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5801,
+      "nom": "Teinture bleu royal",
+      "colorId": "373747FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5802,
+      "nom": "Teinture bleu de minuit",
+      "colorId": "312D57FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5803,
+      "nom": "Teinture bleu turquin",
+      "colorId": "877FAEFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5804,
+      "nom": "Teinture bleu marine",
+      "colorId": "514560FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5805,
+      "nom": "Teinture lavande",
+      "colorId": "322C3BFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5806,
+      "nom": "Teinture colombin",
+      "colorId": "B79EBCFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5807,
+      "nom": "Teinture cassis",
+      "colorId": "3B2A3DFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5808,
+      "nom": "Teinture iris",
+      "colorId": "FECEF5FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5809,
+      "nom": "Teinture raisin",
+      "colorId": "DC9BCAFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5810,
+      "nom": "Teinture mauve lotus",
+      "colorId": "79526CFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5811,
+      "nom": "Teinture mauve colibri",
+      "colorId": "66304EFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5812,
+      "nom": "Teinture prune",
+      "colorId": "E40011FF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    },
+    {
+      "id": 5813,
+      "nom": "Teinture byzantium",
+      "colorId": "F5379BFF",
+      "categoryId": 52254,
+      "categoryName": "Teinture standard"
+    }
+  ],
+  "teinture_additionnelle_1": [
+    {
+      "id": 30116,
+      "nom": "Teinture rouge rubis",
+      "colorId": "FEF864FF",
+      "categoryId": 52255,
+      "categoryName": "Teinture additionnelle n°1"
+    },
+    {
+      "id": 30117,
+      "nom": "Teinture rose cerise",
+      "colorId": "FBF1B4FF",
+      "categoryId": 52255,
+      "categoryName": "Teinture additionnelle n°1"
+    },
+    {
+      "id": 30118,
+      "nom": "Teinture jaune serin",
+      "colorId": "000EA2FF",
+      "categoryId": 52255,
+      "categoryName": "Teinture additionnelle n°1"
+    },
+    {
+      "id": 30119,
+      "nom": "Teinture jaune vanille",
+      "colorId": "04AFCDFF",
+      "categoryId": 52255,
+      "categoryName": "Teinture additionnelle n°1"
+    },
+    {
+      "id": 30120,
+      "nom": "Teinture bleu dragon",
+      "colorId": "DE0B16FF",
+      "categoryId": 52255,
+      "categoryName": "Teinture additionnelle n°1"
+    },
+    {
+      "id": 30121,
+      "nom": "Teinture bleu turquoise",
+      "colorId": "ED118EFF",
+      "categoryId": 52255,
+      "categoryName": "Teinture additionnelle n°1"
+    }
+  ],
+  "teinture_additionnelle_2": [
+    {
+      "id": 48162,
+      "nom": "Teinture rouge carmin",
+      "colorId": "F45011FF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    },
+    {
+      "id": 48163,
+      "nom": "Teinture rose néon",
+      "colorId": "DFEA08FF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    },
+    {
+      "id": 48164,
+      "nom": "Teinture orange brillant",
+      "colorId": "B5F710FF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    },
+    {
+      "id": 48165,
+      "nom": "Teinture jaune néon",
+      "colorId": "3A4C90FF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    },
+    {
+      "id": 48166,
+      "nom": "Teinture vert néon",
+      "colorId": "62508FFF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    },
+    {
+      "id": 48167,
+      "nom": "Teinture bleu azur",
+      "colorId": "1E1E1EFF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    },
+    {
+      "id": 48168,
+      "nom": "Teinture violet pourpre",
+      "colorId": "F9F8F4FF",
+      "categoryId": 52256,
+      "categoryName": "Teinture additionnelle n°2"
+    }
+  ],
+  "teintures_extra_boutique": [
+    {
+      "id": 8732,
+      "nom": "Teinture blanc immaculé extra",
+      "colorId": "FDC8C6FF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8733,
+      "nom": "Teinture noir de jais extra",
+      "colorId": "321919FF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8734,
+      "nom": "Teinture rose pastel extra",
+      "colorId": "28211CFF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8735,
+      "nom": "Teinture rouge foncé extra",
+      "colorId": "BACFAAFF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8736,
+      "nom": "Teinture brun foncé extra",
+      "colorId": "152C2CFF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8737,
+      "nom": "Teinture vert pastel extra",
+      "colorId": "96A4D9FF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8738,
+      "nom": "Teinture vert foncé extra",
+      "colorId": "121F2DFF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8739,
+      "nom": "Teinture bleu pastel extra",
+      "colorId": "BBB5DAFF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8740,
+      "nom": "Teinture bleu foncé extra",
+      "colorId": "232026FF",
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8741,
+      "nom": "Teinture violet pastel extra",
+      "colorId": null,
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    },
+    {
+      "id": 8742,
+      "nom": "Teinture violet foncé extra",
+      "colorId": null,
+      "categoryId": null,
+      "categoryName": "Teinture extra boutique"
+    }
+  ]
+}

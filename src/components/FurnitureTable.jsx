@@ -1,37 +1,10 @@
-import { useState, useEffect } from 'react'
-import { Info } from 'lucide-react'
+import { useState } from 'react'
 
-function FurnitureTable({ data, showDyeColumn = true }) {
+function FurnitureTable({ data }) {
   const [editableData, setEditableData] = useState(() => 
     data.items.map((item, idx) => ({ ...item, _id: idx }))
   )
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
-
-  const getDisplayData = () => {
-    if (showDyeColumn) {
-      return editableData
-    }
-
-    const grouped = {}
-    editableData.forEach(item => {
-      if (!grouped[item.name]) {
-        grouped[item.name] = {
-          ...item,
-          dye: null,
-          quantity: 0,
-          currentQuantity: 0,
-          totalCost: 0,
-          remainingCost: 0
-        }
-      }
-      grouped[item.name].quantity += item.quantity
-      grouped[item.name].currentQuantity += item.currentQuantity || 0
-      grouped[item.name].totalCost += item.totalCost || 0
-      grouped[item.name].remainingCost += item.remainingCost || 0
-    })
-
-    return Object.values(grouped)
-  }
+  const [sortConfig, setSortConfig] = useState({ key: 'world', direction: 'asc' })
 
   const handleQuantityChange = (itemId, value) => {
     const newData = editableData.map(item => {
@@ -61,10 +34,9 @@ function FurnitureTable({ data, showDyeColumn = true }) {
   }
 
   const getSortedData = () => {
-    const displayData = getDisplayData()
-    if (!sortConfig.key) return displayData
+    if (!sortConfig.key) return editableData
 
-    const sorted = [...displayData].sort((a, b) => {
+    const sorted = [...editableData].sort((a, b) => {
       let aVal = a[sortConfig.key]
       let bVal = b[sortConfig.key]
 
@@ -87,9 +59,8 @@ function FurnitureTable({ data, showDyeColumn = true }) {
     return new Intl.NumberFormat('fr-FR').format(amount)
   }
 
-  const displayData = getDisplayData()
-  const totalCost = displayData.reduce((sum, item) => sum + (item.totalCost || 0), 0)
-  const totalRemaining = displayData.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
+  const totalCost = editableData.reduce((sum, item) => sum + (item.totalCost || 0), 0)
+  const totalRemaining = editableData.reduce((sum, item) => sum + (item.remainingCost || 0), 0)
 
   return (
     <div className="space-y-6">
@@ -121,14 +92,6 @@ function FurnitureTable({ data, showDyeColumn = true }) {
               >
                 Meuble
               </th>
-              {showDyeColumn && (
-                <th 
-                  onClick={() => handleSort('dye')}
-                  className="px-4 py-3 text-left text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
-                >
-                  Teinture
-                </th>
-              )}
               <th 
                 onClick={() => handleSort('quantity')}
                 className="px-4 py-3 text-center text-white font-semibold cursor-pointer hover:bg-blue-800/50 transition-colors"
@@ -136,18 +99,7 @@ function FurnitureTable({ data, showDyeColumn = true }) {
                 Quantité
               </th>
               <th className="px-4 py-3 text-center text-white font-semibold">
-                <div className="flex items-center justify-center gap-2">
-                  <span>Quantité Actuelle</span>
-                  {!showDyeColumn && (
-                    <div className="relative group">
-                      <Info size={16} className="text-blue-300 cursor-help" />
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-blue-400/30">
-                        Non éditable quand "Afficher la colonne teintures" est décochée
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                Quantité Actuelle
               </th>
               <th 
                 onClick={() => handleSort('world')}
@@ -182,27 +134,18 @@ function FurnitureTable({ data, showDyeColumn = true }) {
                 className="hover:bg-blue-900/20 transition-colors"
               >
                 <td className="px-4 py-3 text-white">{item.name}</td>
-                {showDyeColumn && (
-                  <td className="px-4 py-3 text-blue-200">
-                    {item.dye || '-'}
-                  </td>
-                )}
                 <td className="px-4 py-3 text-center text-white">
                   {item.quantity}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  {showDyeColumn ? (
-                    <input
-                      type="number"
-                      min="0"
-                      max={item.quantity}
-                      value={item.currentQuantity || 0}
-                      onChange={(e) => handleQuantityChange(item._id, e.target.value)}
-                      className="w-20 px-2 py-1 bg-slate-800/80 border border-blue-400/40 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  ) : (
-                    <span className="text-white">{item.currentQuantity || 0}</span>
-                  )}
+                  <input
+                    type="number"
+                    min="0"
+                    max={item.quantity}
+                    value={item.currentQuantity || 0}
+                    onChange={(e) => handleQuantityChange(item._id, e.target.value)}
+                    className="w-20 px-2 py-1 bg-slate-800/80 border border-blue-400/40 rounded text-white text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </td>
                 <td className="px-4 py-3 text-center text-blue-200">
                   {item.world || 'N/A'}
@@ -221,7 +164,7 @@ function FurnitureTable({ data, showDyeColumn = true }) {
           </tbody>
           <tfoot className="bg-blue-900/70">
             <tr>
-              <td colSpan={showDyeColumn ? "6" : "5"} className="px-4 py-3 text-right text-white font-bold">
+              <td colSpan="5" className="px-4 py-3 text-right text-white font-bold">
                 TOTAL:
               </td>
               <td className="px-4 py-3 text-right text-white font-bold text-lg whitespace-nowrap">
