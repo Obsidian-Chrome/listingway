@@ -11,13 +11,31 @@ const itemNameMappings = {
 
 function cleanItemName(name) {
   return name
+    .replace(/<SoftHyphen\/>/g, '')
+    .replace(/<Indent\/>/g, '')
+    .replace(/<[^>]+>/g, '')
     .replace(/\u00AD/g, '')
     .replace(/\u200B/g, '')
     .replace(/\u200C/g, '')
     .replace(/\u200D/g, '')
     .replace(/\uFEFF/g, '')
-    .replace(/\s*:\s*/g, ' ')
+    .replace(/\s+/g, ' ')
     .toLowerCase()
+    .trim()
+}
+
+function cleanDisplayName(name) {
+  if (!name) return name
+  return name
+    .replace(/<SoftHyphen\/>/g, '')
+    .replace(/<Indent\/>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\u00AD/g, '')
+    .replace(/\u200B/g, '')
+    .replace(/\u200C/g, '')
+    .replace(/\u200D/g, '')
+    .replace(/\uFEFF/g, '')
+    .replace(/\s+/g, ' ')
     .trim()
 }
 
@@ -40,7 +58,7 @@ async function fetchItemById(itemId) {
 
     const itemData = await itemDataResponse.json()
     const item = itemData.item
-    const frenchName = item.name || null
+    const frenchName = cleanDisplayName(item.name) || null
 
     if (!item.tradeable || item.tradeable === 0) {
       if (item.vendors && item.vendors.length > 0) {
@@ -132,7 +150,7 @@ async function searchItemByName(itemName) {
       
       const itemData = await itemDataResponse.json()
       const item = itemData.item
-      frenchName = item.name || mappedName
+      frenchName = cleanDisplayName(item.name) || mappedName
       
       if (!item.tradeable || item.tradeable === 0) {
         if (item.vendors && item.vendors.length > 0) {

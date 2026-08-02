@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Upload, FileText, Download, Loader2 } from 'lucide-react'
+import { Upload, FileText, Download, Loader2, RotateCcw, X } from 'lucide-react'
 import FurnitureTable from './components/FurnitureTable'
 import { parseFurnitureList } from './utils/parser'
 import { fetchPrices } from './utils/api'
@@ -14,6 +14,7 @@ function App() {
   const [compareMode, setCompareMode] = useState(false)
   const [currentHouseData, setCurrentHouseData] = useState(null)
   const [futureHouseData, setFutureHouseData] = useState(null)
+  const [showResetModal, setShowResetModal] = useState(false)
   const [selectedDatacenters, setSelectedDatacenters] = useState({
     chaos: true,
     light: false,
@@ -152,6 +153,14 @@ function App() {
     }
   }
 
+
+  const handleReset = () => {
+    setParsedData(null)
+    setEditedData(null)
+    setCurrentHouseData(null)
+    setFutureHouseData(null)
+    setShowResetModal(false)
+  }
 
   const handleExportCSV = () => {
     const dataToExport = editedData || parsedData
@@ -428,7 +437,14 @@ function App() {
             </div>
 
             {parsedData && (
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowResetModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
+                >
+                  <RotateCcw size={20} />
+                  <span>Nouvelle estimation</span>
+                </button>
                 <button
                   onClick={handleExportCSV}
                   className="flex items-center gap-2 px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
@@ -445,6 +461,43 @@ function App() {
           )}
         </div>
       </div>
+
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowResetModal(false)} />
+          <div className="relative bg-slate-900/95 backdrop-blur-lg rounded-lg shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-blue-500/50">
+            <button
+              onClick={() => setShowResetModal(false)}
+              className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <div className="text-center">
+              <div className="mb-4">
+                <RotateCcw size={48} className="mx-auto text-red-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">Nouvelle estimation</h2>
+              <p className="text-blue-200 mb-6">
+                Êtes-vous sûr de vouloir recommencer ? Toutes les données actuelles seront perdues.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowResetModal(false)}
+                  className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
